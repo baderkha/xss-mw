@@ -92,7 +92,7 @@ func (mw *XssMw) RemoveXss() gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		mw.callRemoveXss(c)
-		return
+
 	}
 }
 
@@ -107,7 +107,6 @@ func (mw *XssMw) callRemoveXss(c *gin.Context) {
 	} else if mw.BmPolicy != "StrictPolicy" && mw.BmPolicy != "UGCPolicy" {
 		fmt.Println("BlueMondy Policy setting is incorrect!")
 		c.Abort()
-		return
 	}
 
 	err := mw.XssRemove(c)
@@ -148,71 +147,9 @@ func (mw *XssMw) GetBlueMondayPolicy() *bluemonday.Policy {
 // Request Method must be "POST" or "PUT"
 //
 func (mw *XssMw) XssRemove(c *gin.Context) error {
-	//dump, derr := httputil.DumpRequest(c.Request, true)
-	//fmt.Print(derr)
-	//fmt.Printf("%q", dump)
 
-	//ReqHeader := c.Request.Header
-	//fmt.Printf("%v Header\n", ReqHeader)
-
-	// https://golang.org/pkg/net/http/#Request
-
-	ReqMethod := c.Request.Method
-	//fmt.Printf("%v Method\n", ReqMethod)
-
-	//ReqBody := c.Request.Body
-	//fmt.Printf("%v URL\n", ReqBody)
-
-	// [application/json] only supported
-	ctHdr := c.Request.Header.Get("Content-Type")
-	//fmt.Printf("%v\n", ctHdr)
-
-	ctsLen := c.Request.Header.Get("Content-Length")
-	//fmt.Printf("%v\n", ctsLen)
-	ctLen, _ := strconv.Atoi(ctsLen)
-
-	// https://golang.org/src/net/http/request.go
-	// check expected application type
-	if ReqMethod == "POST" || ReqMethod == "PUT" {
-		//ReqURL := c.Request.URL
-		//fmt.Printf("%v URL\n", ReqURL)
-
-		//// TODO URL's TO SKIP
-		//// will have to be a regex or indexof in reality
-		//// XXX we wont know id value (at end)
-		//if ReqURL.String() == "/api/v1/end_point/1" {
-		//	fmt.Printf("Skipping URL: %v\n", ReqURL)
-		//	return nil
-		//}
-		//if ReqURL.String() == "/api/v1/end_point2/1" {
-		//	fmt.Printf("Skipping URL: %v\n", ReqURL)
-		//	return nil
-		//}
-
-		if ctLen > 1 && ctHdr == "application/json" {
-			err := mw.HandleJson(c)
-			if err != nil {
-				return err
-			}
-		} else if ctHdr == "application/x-www-form-urlencoded" {
-			err := mw.HandleXFormEncoded(c)
-			if err != nil {
-				return err
-			}
-		} else if strings.Contains(ctHdr, "multipart/form-data") {
-			err := mw.HandleMultiPartFormData(c, ctHdr)
-			if err != nil {
-				return err
-			}
-		}
-	} else if ReqMethod == "GET" {
-		err := mw.HandleGETRequest(c)
-		if err != nil {
-			return err
-		}
-	}
-	// if here, all should be well or nothing was actually done,
-	// either way return happily
+	_ = mw.HandleJson(c)
+	_ = mw.HandleGETRequest(c)
 	return nil
 }
 
